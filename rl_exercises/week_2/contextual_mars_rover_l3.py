@@ -1,11 +1,8 @@
 from __future__ import annotations
 
-import numpy as np
-
 from rl_exercises.environments import ContextualMarsRover
 from rl_exercises.train_agent import evaluate
 from rl_exercises.week_2.policy_iteration import PolicyIteration
-
 
 TRAIN_CONTEXTS = [
     {"action_success_prob": 0.90, "left_goal_reward": 1.0, "right_goal_reward": 10.0},
@@ -22,7 +19,6 @@ TEST_CONTEXTS = [
     {"action_success_prob": 0.45, "left_goal_reward": 10.0, "right_goal_reward": 1.0},
     {"action_success_prob": 0.95, "left_goal_reward": 1.0, "right_goal_reward": 3.0},
 ]
-
 
 
 def train_policy(context_visible: bool) -> PolicyIteration:
@@ -70,9 +66,7 @@ def run_experiment(context_visible: bool) -> dict[str, float]:
         "validation": evaluate_on_context_set(
             agent, VALIDATION_CONTEXTS, context_visible, "validation"
         ),
-        "test": evaluate_on_context_set(
-            agent, TEST_CONTEXTS, context_visible, "test"
-        ),
+        "test": evaluate_on_context_set(agent, TEST_CONTEXTS, context_visible, "test"),
     }
 
     return results

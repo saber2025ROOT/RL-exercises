@@ -247,6 +247,7 @@ class MarsRover(gym.Env):
         """
         print(f"[MarsRover] pos={self.position}, steps={self.current_steps}")
 
+
 class ContextualMarsRover(MarsRover):
     """
     MarsRover with hidden or observed context.
@@ -313,7 +314,6 @@ class ContextualMarsRover(MarsRover):
         rewards = [left_goal_reward, 0.0, 0.0, 0.0, right_goal_reward]
         return transition_probabilities, rewards
 
-
     def _advance_context(self) -> None:
         if self.context_change != "round_robin":
             raise ValueError(f"Unknown context_change: {self.context_change}")
@@ -342,7 +342,9 @@ class ContextualMarsRover(MarsRover):
         self.current_steps = 0
         self.position = 2
         self._advance_context()
-        return self._encode_obs(self.position), {"context": self.contexts[self.context_id]}
+        return self._encode_obs(self.position), {
+            "context": self.contexts[self.context_id]
+        }
 
     def step(self, action: int):
         action = int(action)
@@ -356,7 +358,6 @@ class ContextualMarsRover(MarsRover):
         a_used = action if follow else 1 - action
 
         self.position = self._move_position(self.position, a_used)
-
 
         reward = float(self.rewards[self.position])
         terminated = False
@@ -379,7 +380,6 @@ class ContextualMarsRover(MarsRover):
 
         raise RuntimeError(f"{action} is not a valid action")
 
-
     def get_next_state(self, state: int, action: int) -> int:
         context_id, position = self._decode_obs(state)
         next_position = self._move_position(position, action)
@@ -388,7 +388,6 @@ class ContextualMarsRover(MarsRover):
             return self._encode_obs(next_position, context_id)
 
         return next_position
-
 
     def get_transition_matrix(self, S=None, A=None, P=None):
         if self.context_visible:
@@ -411,7 +410,6 @@ class ContextualMarsRover(MarsRover):
                     intended = self._move_position(pos, a)
                     flipped = self._move_position(pos, 1 - a)
 
-
                     T[s, a, self._encode_obs(intended, c_id)] += P[pos, a]
                     T[s, a, self._encode_obs(flipped, c_id)] += 1.0 - P[pos, a]
 
@@ -429,7 +427,6 @@ class ContextualMarsRover(MarsRover):
                 for a in range(nA):
                     intended = self._move_position(s, a)
                     flipped = self._move_position(s, 1 - a)
-
 
                     T[s, a, intended] += P[s, a] / len(self.contexts)
                     T[s, a, flipped] += (1.0 - P[s, a]) / len(self.contexts)
@@ -461,6 +458,7 @@ class ContextualMarsRover(MarsRover):
                     R[s, a] += T[s, a, next_s] * rewards[next_pos]
 
         return R
+
 
 class MarsRoverPartialObsWrapper(gym.Wrapper):
     """
