@@ -1,0 +1,11 @@
+
+We tested SARSA and Q-learning on the MarsRover environment.
+
+Both agents learned similar behavior and reached a final reward of 50.0.
+The rewards were still noisy because the environment is stochastic.
+
+SARSA is on-policy, so it learns using the actions it actually takes.
+Q-learning is off-policy, so it learns using the best possible next action.
+
+SARSA is more cautious, while Q-learning is more optimistic.
+In this experiment, both performed similarly.

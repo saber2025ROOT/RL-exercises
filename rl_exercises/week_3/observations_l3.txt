@@ -1,0 +1,23 @@
+ 
+We used the random walk environment from the paper. The agent starts in the middle
+and moves randomly left or right until it reaches an end state.
+
+The goal is to learn the value of each state (probability of reaching the right end).
+
+Results (100 episodes, alpha=0.1):
+
+lambda=0.0 → rmse = 0.0746  
+lambda=0.3 → rmse = 0.0753  
+lambda=0.8 → rmse = 0.0646  (best)  
+lambda=1.0 → rmse = 0.1404  (worst)  
+
+Observations:
+- All methods learn approximate values of the states.
+- TD(0) (lambda=0) learns, but more slowly.
+- Higher lambda values spread the learning to previous states.
+- lambda=0.8 gives the best balance between speed and stability.
+- lambda=1 becomes unstable and produces larger error.
+
+Conclusion:
+TD(lambda) improves learning by updating past states.
+Intermediate lambda values work best, which matches the paper.
