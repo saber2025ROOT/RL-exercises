@@ -1,0 +1,48 @@
+1) dqn_h64_l1_buf5000_batch16.png
+Configuration:
+- hidden_dim = 64
+- num_layers = 1
+- buffer_capacity = 5000
+- batch_size = 16
+
+Observation:
+The agent learned slowly and the training curve was noisy. The small network and small batch size resulted in unstable updates and slower convergence.
+
+
+2) dqn_h128_l2_buf10000_batch32.png
+Configuration:
+- hidden_dim = 128
+- num_layers = 2
+- buffer_capacity = 10000
+- batch_size = 32
+
+Observation:
+This configuration showed stable and consistent learning. The agent steadily improved and reached high rewards (~250), indicating a good balance between model capacity and training stability.
+
+
+3) dqn_h256_l2_buf50000_batch64.png
+Configuration:
+- hidden_dim = 256
+- num_layers = 2
+- buffer_capacity = 50000
+- batch_size = 64
+
+Observation:
+The agent learned very quickly and reached a high reward early (~350), but the performance later degraded. This suggests that larger models and buffers can accelerate learning but may introduce instability.
+
+
+4) dqn_h128_l3_buf10000_batch32.png
+Configuration:
+- hidden_dim = 128
+- num_layers = 3
+- buffer_capacity = 10000
+- batch_size = 32
+
+Observation:
+Increasing network depth did not improve performance. The training was stable but slower and achieved lower rewards (~220), indicating deeper networks are not necessary for this task.
+
+
+Overall:
+- Larger networks improve learning speed but can reduce stability.
+- Larger replay buffers and batch sizes lead to smoother training.
+- Deeper networks are not always beneficial for simple environments like CartPole.
