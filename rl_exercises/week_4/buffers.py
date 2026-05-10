@@ -74,6 +74,7 @@ class ReplayBuffer(AbstractBuffer):
         self.next_states.append(next_state)
         self.dones.append(bool(done))
         self.infos.append(info)
+
     def sample(
         self, batch_size: int = 32
     ) -> List[Tuple[Any, Any, float, Any, bool, Dict]]:
@@ -107,7 +108,6 @@ class ReplayBuffer(AbstractBuffer):
     def __len__(self) -> int:
         """Current number of stored transitions."""
         return len(self.states)
-
 
 
 class PrioritizedReplayBuffer(ReplayBuffer):
@@ -179,7 +179,7 @@ class PrioritizedReplayBuffer(ReplayBuffer):
         priorities = np.array(self.priorities, dtype=np.float32)
 
         # compute sampling probabilities
-        scaled_priorities = priorities ** self.alpha
+        scaled_priorities = priorities**self.alpha
         probabilities = scaled_priorities / scaled_priorities.sum()
 
         # sample transitions according to priority distribution

@@ -1,23 +1,48 @@
-Level 1 Observations: DQN on CartPole-v1
-
-We implemented the DQN agent using a Q-network as a function approximator, an epsilon-greedy exploration strategy, a replay buffer, and a frozen target network. The TD target was computed using the target network, while the online Q-network was updated using MSE loss.
-
-Baseline configuration:
+1) dqn_h64_l1_buf5000_batch16.png
+Configuration:
 - hidden_dim = 64
-- replay buffer capacity = 10000
-- batch size = 32
-- learning rate = 0.001
-- gamma = 0.99
+- num_layers = 1
+- buffer_capacity = 5000
+- batch_size = 16
 
-The baseline agent started with low rewards during the exploration phase. After around 4000 to 6000 frames, the mean reward increased strongly, showing that the agent learned a useful policy. Toward the end of training, the mean reward reached around 270.
+Observation:
+The agent learned slowly and the training curve was noisy. The small network and small batch size resulted in unstable updates and slower convergence.
 
-Network width experiment:
-Using a smaller hidden dimension of 32 still allowed the agent to learn the task. The reward increased strongly after several thousand frames and reached high values above 250. However, the final performance dropped compared to the peak, suggesting that the smaller network can solve the task but may be somewhat less stable.
 
-Replay buffer size experiment:
-Increasing the replay buffer capacity to 20000 also allowed learning. The learning curve improved clearly after the initial exploration phase. However, the final reward was lower than the baseline. One possible reason is that a larger buffer keeps older experiences for longer, which may make updates less focused on the most recent policy behavior.
+2) dqn_h128_l2_buf10000_batch32.png
+Configuration:
+- hidden_dim = 128
+- num_layers = 2
+- buffer_capacity = 10000
+- batch_size = 32
 
-Batch size experiment:
-Increasing the batch size to 64 resulted in learning, but the final rewards were lower than the baseline. The curve was smoother in some parts, but performance stayed around 160-190 near the end. This suggests that larger batches may stabilize individual updates, but in this setting they did not improve final performance.
+Observation:
+This configuration showed stable and consistent learning. The agent steadily improved and reached high rewards (~250), indicating a good balance between model capacity and training stability.
 
-Overall, the DQN implementation successfully learned CartPole-v1. The baseline configuration with hidden_dim 64, buffer capacity 10000, and batch size 32 performed best among the tested settings. The results also show that DQN performance is sensitive to architecture and replay/training hyperparameters.
+
+3) dqn_h256_l2_buf50000_batch64.png
+Configuration:
+- hidden_dim = 256
+- num_layers = 2
+- buffer_capacity = 50000
+- batch_size = 64
+
+Observation:
+The agent learned very quickly and reached a high reward early (~350), but the performance later degraded. This suggests that larger models and buffers can accelerate learning but may introduce instability.
+
+
+4) dqn_h128_l3_buf10000_batch32.png
+Configuration:
+- hidden_dim = 128
+- num_layers = 3
+- buffer_capacity = 10000
+- batch_size = 32
+
+Observation:
+Increasing network depth did not improve performance. The training was stable but slower and achieved lower rewards (~220), indicating deeper networks are not necessary for this task.
+
+
+Overall:
+- Larger networks improve learning speed but can reduce stability.
+- Larger replay buffers and batch sizes lead to smoother training.
+- Deeper networks are not always beneficial for simple environments like CartPole.

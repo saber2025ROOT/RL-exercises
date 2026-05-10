@@ -1,12 +1,10 @@
 import glob
 import json
-import os
 
 import matplotlib.pyplot as plt
 import numpy as np
 from rliable import library as rly
-from rliable import plot_utils
-from rliable import metrics
+from rliable import metrics, plot_utils
 
 
 def load_training_data():
@@ -48,14 +46,15 @@ def main():
     final_scores = curves[:, -1]
     score_dict = {"DQN": final_scores[:, None]}
 
-    aggregate_func = lambda x: np.array(
-        [
-            metrics.aggregate_mean(x),
-            metrics.aggregate_median(x),
-            metrics.aggregate_iqm(x),
-            metrics.aggregate_optimality_gap(x, gamma=500),
-        ]
-    )
+    def aggregate_func(x):
+        return np.array(
+            [
+                metrics.aggregate_mean(x),
+                metrics.aggregate_median(x),
+                metrics.aggregate_iqm(x),
+                metrics.aggregate_optimality_gap(x, gamma=500),
+            ]
+        )
 
     aggregate_scores, aggregate_cis = rly.get_interval_estimates(
         score_dict,

@@ -3,19 +3,20 @@ Deep Q-Learning implementation.
 """
 
 from typing import Any, Dict, List, Tuple
-import matplotlib.pyplot as plt
+
+import json
+
 import gymnasium as gym
 import hydra
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
-import torch.nn as nn
-import json
 import torch.optim as optim
 from omegaconf import DictConfig
 from rl_exercises.agent import AbstractAgent
-from rl_exercises.week_4.buffers import ReplayBuffer
+from rl_exercises.week_4.buffers import PrioritizedReplayBuffer, ReplayBuffer
 from rl_exercises.week_4.networks import QNetwork
-from rl_exercises.week_4.buffers import ReplayBuffer, PrioritizedReplayBuffer
+
 
 def set_seed(env: gym.Env, seed: int = 0) -> None:
     """
@@ -106,7 +107,7 @@ class DQNAgent(AbstractAgent):
         )
         self.env = env
         set_seed(env, seed)
-
+        self.seed = seed
         obs_dim = env.observation_space.shape[0]
         n_actions = env.action_space.n
 
@@ -180,7 +181,9 @@ class DQNAgent(AbstractAgent):
         if evaluate:
             # TODO: select purely greedy action from Q(s)
             # purely greedy
+
             t = torch.tensor(state, dtype=torch.float32).unsqueeze(0)
+
             with torch.no_grad():
                 qvals = self.q(t)
             action = int(torch.argmax(qvals, dim=1).item())
@@ -247,14 +250,14 @@ class DQNAgent(AbstractAgent):
 
         # Prioritized replay returns extra values: index and importance weight.
         if self.use_prioritized_replay:
-            states, actions, rewards, next_states, dones, _, idxs, weights = zip(*training_batch)
+            states, actions, rewards, next_states, dones, _, idxs, weights = zip(
+                *training_batch
+            )
             weights_t = torch.tensor(np.array(weights), dtype=torch.float32)
         else:
             states, actions, rewards, next_states, dones, _ = zip(*training_batch)
             idxs = None
             weights_t = torch.ones(len(states), dtype=torch.float32)
-
-
 
         # unpack
         s = torch.tensor(np.array(states), dtype=torch.float32)
@@ -270,7 +273,6 @@ class DQNAgent(AbstractAgent):
         # TODO: compute TD target with frozen network
         # TD target with frozen target network
         with torch.no_grad():
-
             if self.use_double_dqn:
                 # Double DQN:
                 # online network selects the best next action,
@@ -368,13 +370,11 @@ class DQNAgent(AbstractAgent):
                     f,
                 )
 
-
         print("Training complete.")
 
 
 @hydra.main(config_path="../configs/agent/", config_name="dqn", version_base="1.1")
 def main(cfg: DictConfig):
-    # 1) build env
     env = gym.make(cfg.env.name)
     set_seed(env, cfg.seed)
 
