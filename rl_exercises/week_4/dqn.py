@@ -3,18 +3,19 @@ Deep Q-Learning implementation.
 """
 
 from typing import Any, Dict, List, Tuple
-
+import matplotlib.pyplot as plt
 import gymnasium as gym
 import hydra
 import numpy as np
 import torch
 import torch.nn as nn
+import json
 import torch.optim as optim
 from omegaconf import DictConfig
 from rl_exercises.agent import AbstractAgent
 from rl_exercises.week_4.buffers import ReplayBuffer
 from rl_exercises.week_4.networks import QNetwork
-
+from rl_exercises.week_4.buffers import ReplayBuffer, PrioritizedReplayBuffer
 
 def set_seed(env: gym.Env, seed: int = 0) -> None:
     """
@@ -58,6 +59,11 @@ class DQNAgent(AbstractAgent):
         epsilon_final: float = 0.01,
         epsilon_decay: int = 500,
         target_update_freq: int = 1000,
+        hidden_dim: int = 64,
+        use_double_dqn: bool = False,
+        use_prioritized_replay: bool = False,
+        per_alpha: float = 0.6,
+        per_beta: float = 0.4,
         seed: int = 0,
     ) -> None:
         """
@@ -105,12 +111,24 @@ class DQNAgent(AbstractAgent):
         n_actions = env.action_space.n
 
         # main Q‐network and frozen target
-        self.q = QNetwork(obs_dim, n_actions)
-        self.target_q = QNetwork(obs_dim, n_actions)
+        self.q = QNetwork(obs_dim, n_actions, hidden_dim=hidden_dim)
+        self.target_q = QNetwork(obs_dim, n_actions, hidden_dim=hidden_dim)
         self.target_q.load_state_dict(self.q.state_dict())
 
         self.optimizer = optim.Adam(self.q.parameters(), lr=lr)
-        self.buffer = ReplayBuffer(buffer_capacity)
+        # Use normal replay or prioritized replay depending on the experiment.
+        # Prioritized replay samples transitions with larger TD-errors more often.
+        self.use_prioritized_replay = use_prioritized_replay
+        self.use_double_dqn = use_double_dqn
+
+        if self.use_prioritized_replay:
+            self.buffer = PrioritizedReplayBuffer(
+                buffer_capacity,
+                alpha=per_alpha,
+                beta=per_beta,
+            )
+        else:
+            self.buffer = ReplayBuffer(buffer_capacity)
 
         # hyperparams
         self.batch_size = batch_size
@@ -134,7 +152,9 @@ class DQNAgent(AbstractAgent):
         # TODO: implement exponential‐decayin
         # ε = ε_final + (ε_start - ε_final) * exp(-total_steps / ε_decay)
         # Currently, it is constant and returns the starting value ε
-        return self.epsilon_start
+        return self.epsilon_final + (self.epsilon_start - self.epsilon_final) * np.exp(
+            -self.total_steps / self.epsilon_decay
+        )
 
     def predict_action(
         self, state: np.ndarray, info: Dict[str, Any] = {}, evaluate: bool = False
@@ -162,16 +182,19 @@ class DQNAgent(AbstractAgent):
             # purely greedy
             t = torch.tensor(state, dtype=torch.float32).unsqueeze(0)
             with torch.no_grad():
-                qvals = ...
-            action = None
+                qvals = self.q(t)
+            action = int(torch.argmax(qvals, dim=1).item())
         else:
             # ε-greedy
             if np.random.rand() < self.epsilon():
                 # TODO: sample random action
-                action = None
+                action = int(self.env.action_space.sample())
             else:
                 # TODO: select purely greedy action from Q(s)
-                action = None
+                t = torch.tensor(state, dtype=torch.float32).unsqueeze(0)
+                with torch.no_grad():
+                    qvals = self.q(t)
+                action = int(torch.argmax(qvals, dim=1).item())
 
         return action
 
@@ -221,8 +244,19 @@ class DQNAgent(AbstractAgent):
         loss_val : float
             MSE loss value.
         """
+
+        # Prioritized replay returns extra values: index and importance weight.
+        if self.use_prioritized_replay:
+            states, actions, rewards, next_states, dones, _, idxs, weights = zip(*training_batch)
+            weights_t = torch.tensor(np.array(weights), dtype=torch.float32)
+        else:
+            states, actions, rewards, next_states, dones, _ = zip(*training_batch)
+            idxs = None
+            weights_t = torch.ones(len(states), dtype=torch.float32)
+
+
+
         # unpack
-        states, actions, rewards, next_states, dones, _ = zip(*training_batch)
         s = torch.tensor(np.array(states), dtype=torch.float32)
         a = torch.tensor(np.array(actions), dtype=torch.int64).unsqueeze(1)
         r = torch.tensor(np.array(rewards), dtype=torch.float32)
@@ -231,20 +265,39 @@ class DQNAgent(AbstractAgent):
 
         # current Q estimates for taken actions
         # TODO: pass batched states through self.q and gather Q(s,a)
-        pred = ...
+        pred = self.q(s).gather(1, a).squeeze(1)
 
         # TODO: compute TD target with frozen network
+        # TD target with frozen target network
         with torch.no_grad():
-            target = ...
 
-        loss = nn.MSELoss()(pred, target)
+            if self.use_double_dqn:
+                # Double DQN:
+                # online network selects the best next action,
+                # target network evaluates that selected action.
+                next_actions = self.q(s_next).argmax(dim=1, keepdim=True)
+                next_q = self.target_q(s_next).gather(1, next_actions).squeeze(1)
+            else:
+                # Standard DQN:
+                # target network directly takes max over next-state actions.
+                next_q = self.target_q(s_next).max(dim=1)[0]
+
+            target = r + self.gamma * next_q * (1.0 - mask)
+
+        # TD-error is needed for prioritized replay priority updates.
+        td_errors = target - pred
+
+        # Importance weights correct the bias introduced by prioritized sampling.
+        loss = (weights_t * td_errors.pow(2)).mean()
 
         # gradient step
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
 
-        # occasionally sync target network
+        if self.use_prioritized_replay:
+            self.buffer.update_priorities(list(idxs), td_errors.detach().numpy())
+
         if self.total_steps % self.target_update_freq == 0:
             self.target_q.load_state_dict(self.q.state_dict())
 
@@ -265,6 +318,8 @@ class DQNAgent(AbstractAgent):
         state, _ = self.env.reset()
         ep_reward = 0.0
         recent_rewards: List[float] = []
+        plot_frames: List[int] = []
+        plot_rewards: List[float] = []
 
         for frame in range(1, num_frames + 1):
             action = self.predict_action(state)
@@ -278,7 +333,7 @@ class DQNAgent(AbstractAgent):
             # update if ready
             if len(self.buffer) >= self.batch_size:
                 # TODO: sample batch from replay buffer
-                batch = ...
+                batch = self.buffer.sample(self.batch_size)
                 _ = self.update_agent(batch)
 
             if done or truncated:
@@ -288,10 +343,31 @@ class DQNAgent(AbstractAgent):
                 # logging
                 if len(recent_rewards) % 10 == 0:
                     # TODO: compute avg over last eval_interval episodes and print
-                    avg = ...
+                    avg = np.mean(recent_rewards[-10:])
+                    plot_frames.append(frame)
+                    plot_rewards.append(avg)
+
                     print(
                         f"Frame {frame}, AvgReward(10): {avg:.2f}, ε={self.epsilon():.3f}"
                     )
+        if len(plot_frames) > 0:
+            plt.figure()
+            plt.plot(plot_frames, plot_rewards)
+            plt.xlabel("Frames")
+            plt.ylabel("Mean Reward")
+            plt.title("DQN Training Curve")
+            plt.savefig("training_curve.png")
+            plt.close()
+
+            with open("training_data.json", "w") as f:
+                json.dump(
+                    {
+                        "frames": plot_frames,
+                        "rewards": plot_rewards,
+                    },
+                    f,
+                )
+
 
         print("Training complete.")
 
@@ -303,11 +379,29 @@ def main(cfg: DictConfig):
     set_seed(env, cfg.seed)
 
     # 2) TODO: map config → agent kwargs
-    agent_kwargs = dict(...)
+    agent_kwargs = dict(
+        buffer_capacity=cfg.agent.buffer_capacity,
+        batch_size=cfg.agent.batch_size,
+        lr=cfg.agent.learning_rate,
+        gamma=cfg.agent.gamma,
+        epsilon_start=cfg.agent.epsilon_start,
+        epsilon_final=cfg.agent.epsilon_final,
+        epsilon_decay=cfg.agent.epsilon_decay,
+        target_update_freq=cfg.agent.target_update_freq,
+        hidden_dim=cfg.agent.hidden_dim,
+        use_double_dqn=cfg.agent.use_double_dqn,
+        use_prioritized_replay=cfg.agent.use_prioritized_replay,
+        per_alpha=cfg.agent.per_alpha,
+        per_beta=cfg.agent.per_beta,
+        seed=cfg.seed,
+    )
 
     # 3) TODO:instantiate & train
-    agent = ...
-    agent.train(...)
+    agent = DQNAgent(env, **agent_kwargs)
+    agent.train(
+        num_frames=cfg.train.num_frames,
+        eval_interval=cfg.train.eval_interval,
+    )
 
 
 if __name__ == "__main__":

@@ -1,20 +1,22 @@
-We used a contextual MarsRover with three features:
-action_success_prob, left_goal_reward, and right_goal_reward.
-These affect transition dynamics and rewards. Contexts change after each reset and are split into train, validation, and test sets.
+Level 3 Observations: Prioritized Replay and Double DQN
 
-Results:
+For Level 3, I compared four DQN configurations on CartPole-v1:
 
-Without context:
-train: 37.83, val: 40.27, test: 24.67
-→ Learned one compromise policy: [0, 0, 1, 1, 1]
-With context:
-train: 46.00, val: 46.97, test: 16.10
-→ Learned separate policies per context
+1. Base DQN
+2. DQN + Prioritized Experience Replay
+3. DQN + Double DQN
+4. DQN + Prioritized Experience Replay + Double DQN
 
-With hidden context, the agent cannot adapt and learns an average policy.
-With visible context, it adapts better to training contexts, improving train/validation performance.
+The Base DQN configuration achieved the weakest overall performance. It learned more slowly and reached lower rewards compared to the enhanced variants.
 
-However, performance drops on the test set because the tabular representation encodes context IDs, not their meaning. The agent memorizes policies per context instead of generalizing. When new contexts appear, this fails.
+Adding Prioritized Experience Replay improved learning because the replay buffer sampled transitions with larger TD-errors more often. These transitions are usually more informative for the update, so the agent can focus more on experiences where the current Q-network prediction is still inaccurate.
 
-Conclusion:
-Making context visible helps on known contexts but hurts generalization. To match the paper’s goal, the agent needs a method that learns from context features, not just context IDs
+Double DQN also improved performance. In standard DQN, the target uses a max operation over Q-values, which can lead to overestimation. Double DQN reduces this problem by using the online network to select the best next action and the target network to evaluate that action.
+
+The combination of Prioritized Replay and Double DQN achieved the strongest overall performance in the ablation experiment. This can be seen both in the training curves and in the RLiable aggregate metrics.
+
+The training curves show that all methods behave similarly during the early exploration phase. After enough transitions are collected, the improved variants begin to learn faster than the base DQN.
+
+The confidence intervals become wider later in training, which shows that performance varies across random seeds. This confirms again that single-seed results can be misleading in reinforcement learning.
+
+The RLiable metrics provide a more reliable comparison than only looking at one training curve. Mean, median, IQM, and optimality gap together give a better view of the robustness of each method. In particular, IQM is useful because it is less sensitive to outlier runs than the plain mean.

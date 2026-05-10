@@ -1,5 +1,15 @@
-When only step() is available, the environment becomes a black box.
+Level 2 Observations: Multiple Seeds and RLiable Evaluation
 
-Policy Iteration and Value Iteration require full knowledge of transition probabilities P(s'|s,a) and rewards R(s,a) to compute expectations. Without this information, these methods cannot be applied directly.
+For Level 2, the DQN implementation was evaluated across 5 different random seeds on CartPole-v1. Each run produced slightly different learning curves and final performances, despite using the same hyperparameters. This demonstrates the sensitivity of reinforcement learning experiments to random initialization and environment stochasticity.
 
-With step(), we only observe samples (s, a, r, s'), not the full dynamics.
+Using RLiable allowed a more robust evaluation of the algorithm compared to inspecting a single run or using only plain averages. The confidence intervals in the training curve visualization showed that performance variability increased during later stages of training. Some seeds achieved higher rewards faster than others, while some runs learned more slowly.
+
+Compared to plain averages, RLiable provides more informative statistics:
+- Mean can be influenced strongly by a few very good or very bad runs.
+- Median is more robust to outliers.
+- IQM (Interquartile Mean) focuses on the central part of the performance distribution and provides a more stable estimate.
+- Optimality gap measures how far the agent remains from optimal performance.
+
+The aggregate metrics plot showed that the different statistical measures can provide slightly different perspectives on performance quality. In particular, IQM appeared more stable than the standard mean.
+
+Overall, using multiple seeds together with RLiable increases confidence in the experimental results. A single seed can give misleading conclusions, while aggregate statistics across several runs provide a more reliable estimate of the actual algorithm behavior and training stability.
