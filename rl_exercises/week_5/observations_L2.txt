@@ -1,0 +1,53 @@
+Level 2: Empirical Understanding
+
+1) Effect of trajectory length
+
+Configuration:
+- algorithm = REINFORCE
+- environments = CartPole-v0 and CartPole-v1
+- learning_rate = 0.01
+- gamma = 0.99
+- hidden_size = 128
+- episodes = 1000
+
+Observation:
+The trajectory length had a clear effect on the stability of training.
+In CartPole-v0, where the maximum episode length is shorter, the agent reached the maximum evaluation return of 200 several times and became quite stable in the later part of training.
+
+In CartPole-v1, the agent also reached the maximum return of 500 several times, but the performance was less stable and dropped again after successful phases.
+
+This suggests that longer trajectories can provide more reward information, but they also increase the variance of Monte Carlo returns.
+
+Since REINFORCE updates the policy from full episode returns, longer trajectories can make training noisier and less stable.
+
+2) Same architecture and learning rate on LunarLander
+
+Configuration:
+- algorithm = REINFORCE
+- environment = LunarLander-v3
+- learning_rate = 0.01
+- gamma = 0.99
+- hidden_size = 128
+- episodes = 1000
+
+Observation:
+The same network architecture and learning rate did not work reliably for LunarLander.
+The agent sometimes achieved good evaluation scores, for example around 263 at episode 650, but the learning was highly unstable and the performance later dropped again to negative returns.
+
+This shows that LunarLander is more difficult than CartPole and that the same hyperparameters do not transfer reliably.
+
+The environment has a larger observation space, more actions, and a more complex reward structure.
+A smaller learning rate, more training, or variance-reduction methods would likely be needed for more stable learning.
+
+3) Sample complexity compared to DQN
+
+Observation:
+REINFORCE appears to be less sample-efficient than the DQN implementation from the previous exercise.
+
+DQN uses a replay buffer and can reuse past transitions many times during training.
+
+REINFORCE, on the other hand, is an on-policy Monte Carlo method, so each trajectory is used only for the current update and then discarded.
+
+This means REINFORCE usually needs more environment interaction and is more sensitive to noisy returns.
+
+In practice, DQN learned CartPole more consistently, while REINFORCE showed stronger fluctuations and unstable performance, especially on the longer CartPole-v1 task and on LunarLander.

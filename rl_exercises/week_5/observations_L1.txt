@@ -1,0 +1,17 @@
+1) reinforce_l1_cartpole_default.png
+
+Configuration:
+- environment = CartPole-v1
+- algorithm = REINFORCE
+- learning_rate = 0.01
+- gamma = 0.99
+- hidden_size = 128
+- episodes = 1000
+- eval_interval = 50
+- eval_episodes = 5
+
+Observation:
+The REINFORCE agent was able to learn the CartPole task and reached the maximum evaluation return of 500 several times during training.
+However, the performance was highly unstable: after reaching perfect evaluation scores early, the average return later dropped strongly and then recovered again in some later evaluations.
+This behavior is expected for the basic REINFORCE algorithm, because it uses Monte Carlo returns from full episodes and therefore has high-variance policy updates.
+Overall, the implementation works, but the learning curve is noisy and not consistently stable.
