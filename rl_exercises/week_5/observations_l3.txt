@@ -1,0 +1,22 @@
+Level 3: DDPG
+
+Configuration:
+- algorithm = DDPG
+- environment = Pendulum-v1
+- actor learning rate = 1e-4
+- critic learning rate = 1e-3
+- gamma = 0.99
+- tau = 0.005
+- batch size = 64
+- replay buffer size = 100000
+- exploration noise std = 0.1
+- episodes = 200
+
+Observation:
+
+DDPG uses a replay buffer and target networks to improve stability compared to older actor-critic methods.  
+The replay buffer reduces correlation between samples, while the target networks make the Q-targets more stable during training.  
+Unlike DQN, DDPG can work in continuous action spaces because the actor network directly outputs continuous actions.  
+Compared with REINFORCE, DDPG is more sample-efficient because it can reuse old transitions from the replay buffer.  
+In my experiment, the agent showed some learning improvement, but the training was still unstable and did not fully solve Pendulum-v1 in 200 episodes.  
+The results also showed that DDPG is sensitive to hyperparameters such as learning rate, exploration noise, and training duration.
