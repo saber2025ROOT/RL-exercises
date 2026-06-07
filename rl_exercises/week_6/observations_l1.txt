@@ -1,0 +1,10 @@
+Level 1: On-Policy Actor-Critic Baselines
+
+CartPole-v1:
+All baselines eventually reached near-optimal performance (~500 return). The value baseline was the most stable, while none and avg showed larger fluctuations. GAE also solved the task but exhibited higher variability in this experiment.
+
+LunarLander-v3:
+The value baseline achieved the best final performance and was the only method to consistently obtain positive returns. The avg baseline outperformed none and gae, while gae showed the highest variability.
+
+Conclusion:
+Using a baseline improves learning by reducing variance. The learned value baseline performed best overall because it provides a state-dependent estimate of expected return, leading to more stable policy updates.
