@@ -28,7 +28,12 @@ agent:
 
   # Network size
   hidden_size: 128
+  # Enhancement 1
+  use_lr_annealing: false
 
+  # Enhancement 2
+  use_kl_stop: false
+  target_kl: 0.01
 train:
   # Total environment interactions to run
   total_steps: 20000

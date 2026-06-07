@@ -1,0 +1,11 @@
+Level 2: PPO
+
+PPO learned significantly faster than Actor-Critic on LunarLander-v3. Both PPO variants reached positive returns much earlier and maintained higher average performance throughout training.
+
+Two PPO enhancements were implemented:
+1. Learning-rate annealing
+2. KL early stopping
+
+The enhanced PPO variant showed slightly more stable learning behavior, while achieving similar final returns to vanilla PPO. Learning-rate annealing reduced update sizes near the end of training, and KL early stopping prevented overly large policy updates.
+
+Overall, PPO outperformed Actor-Critic, and the enhancements provided a modest improvement in training stability.
