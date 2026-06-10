@@ -1,0 +1,13 @@
+Level 3: SAC
+
+For Level 3, SAC was implemented from scratch as an off-policy actor-critic algorithm. The implementation uses a replay buffer, a Gaussian actor for continuous actions, two Q-networks, two target Q-networks, soft target updates, entropy regularization, and automatic entropy-temperature tuning.
+
+SAC was trained on LunarLander-v3 with continuous=True, because SAC is mainly designed for continuous action spaces. This means that the comparison to PPO is conceptual rather than perfectly identical, since the PPO implementation used in Level 2 works with a categorical policy and was trained on the discrete version of LunarLander-v3.
+
+The SAC agent learned the task successfully. At 10k environment steps, the evaluation return was still negative, around -235.9. By 20k steps, SAC already reached a positive average return of about 102.0. Later in training, the performance became much stronger and mostly stayed above 200 average return. The final evaluation at 200k steps reached about 253.2 ± 18.9.
+
+Compared to PPO, SAC showed a different performance profile. PPO learned quickly on the discrete LunarLander task, while SAC solved the continuous version and achieved high final returns. SAC benefits from being off-policy: it can reuse past experience from the replay buffer instead of discarding trajectories after one update. This supports the claim that SAC can be more sample-efficient in continuous-control settings.
+
+The entropy term also played an important role. Automatic temperature tuning adjusted the entropy coefficient alpha during training. Alpha decreased from about 0.228 at 10k steps to about 0.083 at 200k steps. This suggests that the agent explored more strongly early in training and then gradually reduced exploration as the policy improved.
+
+Overall, the experiment supports the main SAC claims discussed in the paper and lecture: SAC is suitable for continuous-control tasks, off-policy replay improves data reuse, twin Q-networks and target networks stabilize critic learning, and entropy regularization encourages exploration. However, because PPO and SAC were not evaluated on exactly the same action-space setting, the comparison should be interpreted carefully.
