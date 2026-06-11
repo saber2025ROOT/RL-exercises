@@ -5,10 +5,11 @@ Soft Actor-Critic (SAC)
 
 from __future__ import annotations
 
+from typing import Deque, Tuple
+
 import os
 import random
 from collections import deque
-from typing import Any, Deque, Tuple
 
 import gymnasium as gym
 import hydra
@@ -19,7 +20,6 @@ import torch.nn.functional as F
 import torch.optim as optim
 from omegaconf import DictConfig
 from rl_exercises.agent import AbstractAgent
-
 
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = True

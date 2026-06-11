@@ -63,9 +63,6 @@ class ActorCriticAgent(AbstractAgent):
         # running average baseline for 'avg'
         if baseline_type == "avg":
             self.running_return = 0.0
-        self.eval_steps = []
-        self.eval_returns = []
-        self.eval_stds = []
 
     def predict_action(
         self, state: np.ndarray, evaluate: bool = False
@@ -90,18 +87,24 @@ class ActorCriticAgent(AbstractAgent):
         self, states: List[np.ndarray], rewards: List[float]
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         # TODO: convert rewards into discounted returns
-        returns = self.compute_returns(rewards)
+
         # TODO: convert states list into a torch batch and compute state-values
-        states_t = torch.stack([torch.from_numpy(s).float() for s in states])
+
         # TODO: compute raw advantages = returns - values
+
+        # TODO: normalize advantages to zero mean and unit variance and use 1e-8 for numerical stability
+
+        # return normalized advantages and returns
+        # return None  # template placeholder
+
+        returns = self.compute_returns(rewards)
+        states_t = torch.stack([torch.from_numpy(s).float() for s in states])
         values = self.value_fn(states_t)
         advantages = returns - values.detach()
-        # TODO: normalize advantages to zero mean and unit variance and use 1e-8 for numerical stability
         advantages = (advantages - advantages.mean()) / (
             advantages.std(unbiased=False) + 1e-8
         )
-        # return normalized advantages and returns
-        return advantages, returns  # template placeholder
+        return advantages, returns
 
     def compute_gae(
         self,
@@ -111,38 +114,42 @@ class ActorCriticAgent(AbstractAgent):
         dones: List[bool],
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         # TODO: compute values and next_values using your value_fn
-        states_torch = torch.stack([torch.from_numpy(s).float() for s in states])
-        next_states_torch = torch.stack(
-            [torch.from_numpy(s).float() for s in next_states]
-        )
-        values = self.value_fn(states_torch)
-        with torch.no_grad():
-            next_values = self.value_fn(next_states_torch)
-        rewards_torch = torch.tensor(rewards, dtype=torch.float32)
-        dones_torch = torch.tensor(dones, dtype=torch.float32)
-        # TODO: compute deltas: one-step TD errors
-        deltas = rewards_torch + self.gamma * next_values * (1 - dones_torch) - values
-        # TODO: accumulate GAE advantages backwards
-        advantages = torch.zeros_like(rewards_torch)
-        gae = 0.0
 
-        for t in reversed(range(len(rewards))):
-            mask = 1.0 - dones_torch[t]
-            gae = deltas[t] + self.gamma * self.gae_lambda * mask * gae
-            advantages[t] = gae
+        # TODO: compute deltas: one-step TD errors
+
+        # TODO: accumulate GAE advantages backwards
 
         # TODO: compute returns using advantages and values
-        returns = advantages + values
 
-        advantages = advantages.detach()
-        returns = returns.detach()
         # TODO: normalize advantages to zero mean and unit variance and use 1e-8 for numerical stability
+
+        # TODO: advantages, returns  # replace with actual values (detach both to avoid re-entering the graph)
+
+        # return None  # template placeholder
+
+        # convert to tensors
+        states_t = torch.stack([torch.from_numpy(s).float() for s in states])
+        next_t = torch.stack([torch.from_numpy(s).float() for s in next_states])
+        rewards_t = torch.tensor(rewards, dtype=torch.float32)
+        dones_t = torch.tensor(dones, dtype=torch.float32)
+        # values
+        values = self.value_fn(states_t)
+        next_values = self.value_fn(next_t)
+        # deltas
+        deltas = rewards_t + self.gamma * next_values * (1 - dones_t) - values
+        # GAE advantage
+        advs: List[torch.Tensor] = []
+        A = 0.0
+        for delta, done in zip(reversed(deltas), reversed(dones_t)):
+            A = delta + self.gamma * self.gae_lambda * A * (1 - done)
+            advs.insert(0, A)
+        advantages = torch.stack(advs)
+        returns = advantages + values.detach()
+        # normalize
         advantages = (advantages - advantages.mean()) / (
             advantages.std(unbiased=False) + 1e-8
         )
-        # TODO: advantages, returns  # replace with actual values (detach both to avoid re-entering the graph)
-
-        return advantages, returns  # template placeholder
+        return advantages.detach(), returns.detach()
 
     def update_agent(
         self,
@@ -161,17 +168,19 @@ class ActorCriticAgent(AbstractAgent):
             ret = self.compute_returns(list(rewards))
 
             # TODO: compute advantages by subtracting running return
-            adv = ret - self.running_return  # template placeholder
+            # adv = ...  # template placeholder
 
             # TODO: normalize advantages to zero mean and unit variance and use 1e-8 for numerical stability
             # (Reminder, use unbiased=False for torch tensors)
-            adv = (adv - adv.mean()) / (adv.std(unbiased=False) + 1e-8)
 
             # TODO: update running return using baseline decay
             # (x = baseline_decay * x + (1 - baseline_decay) * mean return)
+
+            adv = ret - self.running_return
+            adv = (adv - adv.mean()) / (adv.std(unbiased=False) + 1e-8)
             self.running_return = (
                 self.baseline_decay * self.running_return
-                + (1.0 - self.baseline_decay) * ret.mean().item()
+                + (1 - self.baseline_decay) * ret.mean().item()
             )
         else:
             ret = self.compute_returns(list(rewards))
@@ -250,21 +259,11 @@ class ActorCriticAgent(AbstractAgent):
                     print(
                         f"[Eval ] Step {step_count:6d} AvgReturn {mean_r:5.1f} ± {std_r:4.1f}"
                     )
-                    self.eval_steps.append(step_count)
-                    self.eval_returns.append(mean_r)
-                    self.eval_stds.append(std_r)
 
             policy_loss, value_loss = self.update_agent(trajectory)
             total_return = sum(r for _, _, r, *_ in trajectory)
             print(
                 f"[Train] Step {step_count:6d} Return {total_return:5.1f} Policy Loss {policy_loss:.3f} Value Loss {value_loss:.3f}"
-            )
-
-            np.savez(
-                f"{self.baseline_type}_{self.env.spec.id}_0_results.npz",
-                steps=np.array(self.eval_steps),
-                returns=np.array(self.eval_returns),
-                stds=np.array(self.eval_stds),
             )
 
         print("Training complete.")
