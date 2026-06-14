@@ -3,18 +3,17 @@ Level 1 comparison: DQN baseline vs RND-DQN on CartPole-v1.
 
 """
 
-from pathlib import Path
 from typing import List, Tuple
+
+from pathlib import Path
 
 import gymnasium as gym
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from omegaconf import OmegaConf
-
 from rl_exercises.week_4.dqn import DQNAgent, set_seed
 from rl_exercises.week_7.rnd_dqn import RNDDQNAgent
-
 
 OUTPUT_DIR = Path("rl_exercises/week_7/results_l1")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)

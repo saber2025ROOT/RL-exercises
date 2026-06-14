@@ -220,16 +220,8 @@ class RNDPPOAgent(PPOAgent):
         rews_ext = torch.tensor(rewards_ext, dtype=torch.float32)
         rews_int = torch.tensor(rewards_int, dtype=torch.float32)
 
-        deltas_ext = (
-                rews_ext
-                + self.gamma * next_values_ext * (1 - dones)
-                - values_ext
-        )
-        deltas_int = (
-                rews_int
-                + self.int_gamma * next_values_int
-                - values_int
-        )
+        deltas_ext = rews_ext + self.gamma * next_values_ext * (1 - dones) - values_ext
+        deltas_int = rews_int + self.int_gamma * next_values_int - values_int
 
         # GAE for extrinsic stream
         advs_ext: List[torch.Tensor] = []
@@ -253,7 +245,7 @@ class RNDPPOAgent(PPOAgent):
         # TODO: Combined advantages weighted by coefficients, then normalize
         combined_advs = self.ext_coef * advs_ext_t + self.int_coef * advs_int_t
         combined_advs = (combined_advs - combined_advs.mean()) / (
-                combined_advs.std(unbiased=False) + 1e-8
+            combined_advs.std(unbiased=False) + 1e-8
         )
 
         return (
@@ -369,7 +361,9 @@ class RNDPPOAgent(PPOAgent):
                     target_emb = self.target_rnd(b_states_rnd)
 
                 predictor_emb = self.predictor_rnd(b_states_rnd)
-                rnd_errors = F.mse_loss(predictor_emb, target_emb, reduction="none").mean(dim=1)
+                rnd_errors = F.mse_loss(
+                    predictor_emb, target_emb, reduction="none"
+                ).mean(dim=1)
 
                 mask = (torch.rand(len(rnd_errors)) < self.update_proportion).float()
                 if mask.sum() > 0:

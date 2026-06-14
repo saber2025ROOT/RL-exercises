@@ -1,0 +1,7 @@
+Level 2: Visualize Exploration and NovelD
+
+we implemented NovelD for PPO and analyzed exploration using LunarLander-v3. We recorded the visited x/y positions and generated snapshots at 10k, 20k, and 30k training steps.
+
+The 10k snapshot shows broad exploration with many different trajectories. At 20k, a larger area of the state space is visited, indicating stronger exploration. At 30k, the trajectories become more concentrated, suggesting a shift from exploration toward learning useful landing behavior.
+
+Overall, the snapshots show that NovelD encouraged exploration early in training while allowing the policy to focus on more promising states later.

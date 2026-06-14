@@ -8,8 +8,9 @@ It creates:
 
 """
 
-from pathlib import Path
 from typing import Dict, List
+
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -17,7 +18,6 @@ import pandas as pd
 from rliable import metrics
 from rliable.library import get_interval_estimates
 from rliable.plot_utils import plot_sample_efficiency_curve
-
 
 RESULTS_DIR = Path("rl_exercises/week_7/results_l1")
 CSV_PATH = RESULTS_DIR / "l1_rnd_dqn_results.csv"
@@ -87,7 +87,9 @@ def build_score_arrays(
     return eval_frames, train_scores
 
 
-def plot_iqm_curve(eval_frames: np.ndarray, train_scores: Dict[str, np.ndarray]) -> None:
+def plot_iqm_curve(
+    eval_frames: np.ndarray, train_scores: Dict[str, np.ndarray]
+) -> None:
     """
     Plot IQM sample-efficiency curves with confidence intervals using RLiable.
     """
@@ -129,8 +131,7 @@ def save_final_statistics(train_scores: Dict[str, np.ndarray]) -> None:
     We use the final evaluation point of each seed.
     """
     final_scores = {
-        algorithm: scores[:, -1:]
-        for algorithm, scores in train_scores.items()
+        algorithm: scores[:, -1:] for algorithm, scores in train_scores.items()
     }
 
     aggregate_func = lambda scores: np.array(  # noqa: E731
