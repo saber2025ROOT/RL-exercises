@@ -1,0 +1,13 @@
+Level 1 – Seeding
+
+We trained PPO on CartPole-v1 using 30 different random seeds and compared evaluation results for different seed group sizes.
+
+For the low-seed setting, we evaluated three different groups of five seeds (Low A, Low B and Low C). The resulting learning curves differed noticeably. Depending on which five seeds were selected, the estimated performance varied substantially, especially during later stages of training. This demonstrates that conclusions based on a small number of seeds can be unreliable and highly dependent on the chosen seed set.
+
+As the number of seeds increased, the evaluation curves became more stable. The large-seed group (30 seeds) produced much smoother learning curves and more consistent performance estimates. This suggests that larger seed counts provide a better estimate of the true expected performance of the algorithm.
+
+The standard deviation remained relatively large throughout training, indicating substantial variability between individual runs. However, the standard error and the 95% confidence interval width were considerably smaller for larger seed groups. This is expected because the standard error decreases with increasing sample size.
+
+Comparing different metrics revealed that the mean reward was most sensitive to fluctuations and outliers. The median reward was more robust, while the interquartile mean (IQM) provided a good balance between robustness and information retention. The IQM curves were generally smoother than the mean curves and less affected by extreme runs.
+
+Overall, the experiment confirms that the number of seeds strongly influences the reliability of reinforcement learning evaluations. Using only a small number of seeds can lead to misleading conclusions, while larger seed sets provide more stable and trustworthy performance estimates.

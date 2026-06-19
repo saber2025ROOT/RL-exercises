@@ -1,0 +1,21 @@
+algorithm,seed,final_eval_return
+PPO,0,466.1
+PPO,1,376.3
+PPO,2,353.3
+PPO,3,342.8
+PPO,4,317.4
+PPO,5,495.7
+PPO,6,500.0
+PPO,7,453.1
+PPO,8,467.0
+PPO,9,126.9
+Actor-Critic GAE,0,394.4
+Actor-Critic GAE,1,499.2
+Actor-Critic GAE,2,328.8
+Actor-Critic GAE,3,348.9
+Actor-Critic GAE,4,345.9
+Actor-Critic GAE,5,392.4
+Actor-Critic GAE,6,485.4
+Actor-Critic GAE,7,332.2
+Actor-Critic GAE,8,470.1
+Actor-Critic GAE,9,484.1
