@@ -1,0 +1,20 @@
+Level 2 – Statistical Testing
+
+We compared PPO and Actor-Critic with GAE on CartPole-v1. Both algorithms were trained for 50,000 environment steps using 10 random seeds each. For every seed, the final policy was evaluated over 10 episodes, and the mean final evaluation return was used as one sample.
+
+We used the Mann-Whitney U-test with a significance level of α = 0.05. This test was chosen because it was discussed in the lecture as a useful non-parametric test for RL comparisons, especially when we do not want to assume normally distributed results.
+
+The final PPO returns were:
+[466.1, 376.3, 353.3, 342.8, 317.4, 495.7, 500.0, 453.1, 467.0, 126.9]
+
+The final Actor-Critic GAE returns were:
+[394.4, 499.2, 328.8, 348.9, 345.9, 392.4, 485.4, 332.2, 470.1, 484.1]
+
+The Mann-Whitney U-test produced:
+
+U statistic = 47.0
+p-value = 0.850107
+
+Since the p-value is larger than α = 0.05, we fail to reject the null hypothesis. Therefore, this experiment does not provide enough evidence to conclude that PPO and Actor-Critic GAE differ significantly on CartPole-v1 under this setup.
+
+The result also shows why statistical testing in RL must be interpreted carefully. Even though individual runs differ strongly, the aggregated results over 10 seeds do not show a statistically significant difference between the two algorithms.

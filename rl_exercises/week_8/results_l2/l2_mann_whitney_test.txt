@@ -1,0 +1,21 @@
+Level 2 Statistical Test
+========================
+
+Environment: CartPole-v1
+Algorithms: PPO vs Actor-Critic with GAE
+Seeds per algorithm: 10
+Metric: final evaluation return over 10 episodes
+Test: Mann-Whitney U-test
+Significance level alpha: 0.05
+
+PPO final returns:
+[466.1, 376.3, 353.3, 342.8, 317.4, 495.7, 500.0, 453.1, 467.0, 126.9]
+
+Actor-Critic GAE final returns:
+[394.4, 499.2, 328.8, 348.9, 345.9, 392.4, 485.4, 332.2, 470.1, 484.1]
+
+U statistic: 47.0000
+p-value: 0.850107
+
+Result: Fail to reject the null hypothesis.
+Interpretation: The test does not provide enough evidence for a statistically significant difference at alpha = 0.05.
