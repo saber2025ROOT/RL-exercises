@@ -18,8 +18,8 @@ import unittest
 import gymnasium as gym
 import numpy as np
 import torch
+from rl_exercises.dyna_ppo import DynamicsModel, DynaPPOAgent
 from rl_exercises.week_6 import PPOAgent
-from rl_exercises.week_9.dyna_ppo import DynamicsModel, DynaPPOAgent
 
 STATE_DIM = 4
 ACTION_DIM = 2

@@ -1,12 +1,12 @@
 # rl_exercises/week_8/plot_l1_seeding.py
 
-import os
 from typing import Dict, List
+
+import os
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-
 
 RESULTS_DIR = "rl_exercises/week_8/results_l1"
 INPUT_FILE = os.path.join(RESULTS_DIR, "l1_all_seed_results.csv")
