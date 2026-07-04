@@ -1,17 +1,16 @@
 # rl_exercises/week_8/run_l2_statistical_test.py
 
-import os
 from typing import Any, List, Tuple
+
+import os
 
 import gymnasium as gym
 import numpy as np
 import pandas as pd
 import torch
-from scipy.stats import mannwhitneyu
-
 from rl_exercises.week_6.actor_critic import ActorCriticAgent
 from rl_exercises.week_6.ppo import PPOAgent, set_seed
-
+from scipy.stats import mannwhitneyu
 
 RESULTS_DIR = "rl_exercises/week_8/results_l2"
 ENV_NAME = "CartPole-v1"
@@ -161,9 +160,7 @@ def train_actor_critic_one_seed(seed: int) -> float:
             next_state, reward, terminated, truncated, _ = env.step(action)
             done = terminated or truncated
 
-            trajectory.append(
-                (state, action, float(reward), next_state, done, logp)
-            )
+            trajectory.append((state, action, float(reward), next_state, done, logp))
 
             state = next_state
             step_count += 1
@@ -221,7 +218,9 @@ def main() -> None:
     print(f"Saved raw results to {results_path}")
 
     ppo_values = df[df["algorithm"] == "PPO"]["final_eval_return"].to_numpy()
-    ac_values = df[df["algorithm"] == "Actor-Critic GAE"]["final_eval_return"].to_numpy()
+    ac_values = df[df["algorithm"] == "Actor-Critic GAE"][
+        "final_eval_return"
+    ].to_numpy()
 
     statistic, p_value = mannwhitneyu(
         ppo_values,

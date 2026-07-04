@@ -1,0 +1,4 @@
+Dyna-PPO reaches 80% of the final PPO performance approximately 5,000 real environment steps earlier than standard PPO.
+
+
+No significant model learning penalty was observed. Dyna-PPO performed slightly better than PPO at the first evaluation (118.4 vs. 111.2 average return).

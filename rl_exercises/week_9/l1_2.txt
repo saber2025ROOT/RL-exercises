@@ -1,0 +1,2 @@
+Q1: Dyna-PPO began to outperform PPO when the one-step state MSE was approximately 0.0001 or lower.
+Q2: The multi-step error (Ek) increased gradually as the prediction horizon increased due to accumulated prediction errors. Therefore, using a short imagination horizon (imag_horizon = 5) is appropriate because it limits prediction error while still benefiting from imagined rollouts.

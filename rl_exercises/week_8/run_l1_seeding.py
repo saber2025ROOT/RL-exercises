@@ -1,18 +1,19 @@
 # rl_exercises/week_8/run_l1_seeding.py
 
+from typing import Any, List
+
 import os
-import random
-from typing import Any, List, Tuple
 
 import gymnasium as gym
 import numpy as np
-import torch
 import pandas as pd
-
+import torch
 from rl_exercises.week_6.ppo import PPOAgent, set_seed
 
 
-def evaluate_policy(agent: PPOAgent, env_name: str, seed: int, num_episodes: int = 5) -> float:
+def evaluate_policy(
+    agent: PPOAgent, env_name: str, seed: int, num_episodes: int = 5
+) -> float:
     eval_env = gym.make(env_name)
     returns = []
 
