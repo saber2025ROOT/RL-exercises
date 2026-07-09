@@ -1,0 +1,22 @@
+Week 10 Level 1 - Raw HPO Generalization Results
+============================================================
+Generalization type: across random seeds
+Tuning seeds: 0..4
+Test seeds: 100..129
+HPO method: random search
+Algorithm: tabular Q-learning
+Environment: stochastic chain environment
+Metric: mean greedy evaluation return
+
+Tested configurations:
+rank,config_id,tune_mean,tune_std,test_mean,test_std,alpha,gamma,eps_start,eps_decay,eps_min
+1,0,0.996,0.008,0.979,0.071,0.281925,0.858019,0.610180,0.003948,0.052217
+2,2,0.996,0.008,0.984,0.059,0.161659,0.886500,0.912121,0.004400,0.187952
+3,7,0.996,0.008,0.999,0.005,0.074705,0.968759,0.932611,0.006036,0.136490
+4,11,0.996,0.008,0.934,0.173,0.122021,0.974430,0.808246,0.005337,0.204645
+5,15,0.996,0.008,0.991,0.033,0.149122,0.940912,0.871940,0.009764,0.082673
+6,28,0.912,0.166,0.884,0.205,0.609813,0.861978,0.927358,0.003410,0.053018
+7,8,0.368,0.290,0.505,0.310,0.037937,0.936903,0.618953,0.033616,0.051672
+
+Default configuration:
+config_id=30, tune_mean=0.944, tune_std=0.102, test_mean=0.979, test_std=0.072, alpha=0.100000, gamma=0.990000, eps_start=1.000000, eps_decay=0.010000, eps_min=0.050000

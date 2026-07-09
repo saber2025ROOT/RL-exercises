@@ -1,0 +1,51 @@
+Week 10 Level 1 - How Well Does HPO Generalize in RL?
+
+Generalization task:
+In this experiment, we study whether hyperparameter optimization in reinforcement learning generalizes across random seeds.
+We do not generalize across environments or algorithms. The algorithm is tabular Q-learning, and the environment is a small stochastic chain environment.
+
+The HPO method is random search. We tune the hyperparameters on five random seeds, namely seeds 0 to 4.
+After the tuning phase, the best configurations are evaluated again on unseen seeds from 100 to 129.
+Therefore, the goal is to test whether a hyperparameter configuration that performs well during tuning also performs well under different randomness.
+
+Experiment setup:
+The tuned hyperparameters are:
+- learning rate alpha
+- discount factor gamma
+- initial exploration rate eps_start
+- exploration decay eps_decay
+- minimum exploration rate eps_min
+
+The optimization evaluates 30 randomly sampled configurations and one default configuration.
+The objective is the mean greedy evaluation return after training. Since the return is between 0 and 1, it can also be interpreted as a success rate.
+
+Expected result:
+We expect the best HPO configurations to generalize reasonably well to unseen seeds, but not perfectly.
+The reason is that reinforcement learning evaluations are noisy.
+A configuration can achieve a high return on the tuning seeds but slightly worse or better return on unseen seeds.
+
+Results:
+Several configurations achieved the same best tuning score of tune_mean = 0.996.
+
+Among the top configurations:
+- config 0 achieved tune_mean = 0.996 and test_mean = 0.979
+- config 2 achieved tune_mean = 0.996 and test_mean = 0.984
+- config 7 achieved tune_mean = 0.996 and test_mean = 0.999
+- config 11 achieved tune_mean = 0.996 and test_mean = 0.934
+- config 15 achieved tune_mean = 0.996 and test_mean = 0.991
+
+The default configuration achieved tune_mean = 0.944 and test_mean = 0.979.
+
+The median-ranked configuration achieved tune_mean = 0.912 and test_mean = 0.884.
+
+The worst-ranked configuration achieved tune_mean = 0.368 and test_mean = 0.505.
+
+Do the results match the expectation?
+Yes, the results mostly match the expectation.
+HPO found configurations that also work well on unseen seeds. However, the exact ranking does not transfer perfectly.
+For example, config 0 was selected first because it was one of the best configurations on the tuning seeds, but config 7 achieved a better test score on the unseen seeds.
+
+Conclusion:
+The experiment shows that HPO can generalize across random seeds, but not perfectly.
+The best configurations on the tuning seeds usually also perform well on unseen seeds, but the ranking between them can change.
+This supports the lecture point that RL evaluations based on expected return are noisy, so hyperparameter configurations should be evaluated over several seeds instead of relying on only one seed.

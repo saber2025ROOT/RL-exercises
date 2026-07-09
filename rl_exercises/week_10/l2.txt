@@ -1,0 +1,29 @@
+
+Setting:
+In this experiment, we study whether low-fidelity evaluations can be misleading in RL hyperparameter optimization.
+
+Algorithm: tabular Q-learning
+Environment: stochastic chain environment
+Low fidelity: 50 training episodes
+High fidelity: 250 training episodes
+Seeds: 0..4
+Metric: mean greedy evaluation return
+
+Why early scores can be deceiving:
+In reinforcement learning, early performance is noisy. A configuration can look good after only a small training budget because it exploits quickly. However, another configuration may need more training before it becomes strong. Therefore, selecting configurations only from early performance can negatively influence multi-fidelity optimization.
+
+Results:
+The best low-fidelity configuration was config 2:
+low_mean = 0.996
+high_mean = 0.996
+high-fidelity rank = 2
+
+The best high-fidelity configuration was config 0:
+low_mean = 0.792
+high_mean = 0.996
+low-fidelity rank = 17
+
+Several configurations changed rank strongly. For example, config 0 looked mediocre after 50 episodes, ranking only 17th under low fidelity, but became the best configuration after 250 episodes. This shows that early performance did not perfectly predict final performance.
+
+Conclusion:
+The results show that low-fidelity evaluations can be misleading in RL. The configuration selected as best after 50 episodes was not the same as the configuration selected as best after 250 episodes. Therefore, a multi-fidelity optimizer that promotes only configurations with strong early performance could miss strong final configurations. This supports the idea that multi-fidelity HPO in RL should be used carefully, with multiple seeds and final high-fidelity validation.
